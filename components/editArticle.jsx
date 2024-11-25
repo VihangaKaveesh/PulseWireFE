@@ -26,7 +26,16 @@ const EditArticle = () => {
   const [loading, setLoading] = useState(false); // Set loading state to false initially
   const [error, setError] = useState(null);
 
-  // Initialize Tiptap editor
+  // Initialize Tiptap editor only on the client side
+  const [editorReady, setEditorReady] = useState(false);
+
+  useEffect(() => {
+    // This ensures the editor initializes only in the browser (client-side)
+    if (typeof window !== "undefined") {
+      setEditorReady(true);
+    }
+  }, []);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -53,14 +62,13 @@ const EditArticle = () => {
     const fetchArticle = async () => {
       setLoading(true); // Set loading to true while fetching the article
       try {
-       
         const response = await axios.get(`${backendUrl}/article/${articleId}`);
         const fetchedArticle = response.data;
         setArticle(fetchedArticle);
         setLoading(false); // Set loading to false once data is fetched
 
         // Set the editor content when the article data is fetched
-        if (editor) {
+        if (editor && fetchedArticle.content) {
           editor.commands.setContent(fetchedArticle.content); // Populate content
         }
       } catch (err) {
@@ -70,7 +78,7 @@ const EditArticle = () => {
     };
 
     if (articleId) fetchArticle();
-  }, [articleId, editor]);
+  }, [articleId, backendUrl, editor]); // Added backendUrl to dependencies
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -101,7 +109,6 @@ const EditArticle = () => {
     }
 
     try {
-      
       const response = await axios.put(`${backendUrl}/update/${articleId}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -162,75 +169,81 @@ const EditArticle = () => {
             </div>
 
             {/* Tiptap Editor */}
-            <div>
-              <label htmlFor="content" className="block text-sm font-medium text-gray-900">
-                Content
-              </label>
-              <div className="mt-2 border border-gray-300 rounded-md shadow-sm">
-                {/* Toolbar */}
-                {editor && (
-                  <div className="toolbar flex flex-wrap space-x-2 bg-gray-100 p-2 rounded-t-md shadow">
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().toggleBold().run()}
-                      className={`p-2 rounded ${editor.isActive("bold") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                    >
-                      <FaBold />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().toggleItalic().run()}
-                      className={`p-2 rounded ${editor.isActive("italic") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                    >
-                      <FaItalic />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().toggleUnderline().run()}
-                      className={`p-2 rounded ${editor.isActive("underline") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                    >
-                      <FaUnderline />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().setTextAlign("left").run()}
-                      className={`p-2 rounded ${editor.isActive({ textAlign: "left" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                    >
-                      <FaAlignLeft />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().setTextAlign("center").run()}
-                      className={`p-2 rounded ${editor.isActive({ textAlign: "center" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                    >
-                      <FaAlignCenter />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().setTextAlign("right").run()}
-                      className={`p-2 rounded ${editor.isActive({ textAlign: "right" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                    >
-                      <FaAlignRight />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().undo().run()}
-                      className="p-2 rounded text-gray-800 hover:bg-gray-200"
-                    >
-                      <FaUndo />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => editor.chain().focus().redo().run()}
-                      className="p-2 rounded text-gray-800 hover:bg-gray-200"
-                    >
-                      <FaRedo />
-                    </button>
-                  </div>
-                )}
-                <EditorContent editor={editor} className="p-3 min-h-[200px]" />
+            {editorReady && (
+              <div>
+                <label htmlFor="content" className="block text-sm font-medium text-gray-900">
+                  Content
+                </label>
+                <div className="mt-2 border border-gray-300 rounded-md shadow-sm">
+                  {/* Toolbar */}
+                  {editor && (
+                    <div className="toolbar flex flex-wrap space-x-2 bg-gray-100 p-2 rounded-t-md shadow">
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().toggleBold().run()}
+                        className={`p-2 rounded ${editor.isActive("bold") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
+                      >
+                        <FaBold />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().toggleItalic().run()}
+                        className={`p-2 rounded ${editor.isActive("italic") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
+                      >
+                        <FaItalic />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().toggleUnderline().run()}
+                        className={`p-2 rounded ${editor.isActive("underline") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
+                      >
+                        <FaUnderline />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().setTextAlign("left").run()}
+                        className={`p-2 rounded ${editor.isActive({ textAlign: "left" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
+                      >
+                        <FaAlignLeft />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().setTextAlign("center").run()}
+                        className={`p-2 rounded ${editor.isActive({ textAlign: "center" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
+                      >
+                        <FaAlignCenter />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().setTextAlign("right").run()}
+                        className={`p-2 rounded ${editor.isActive({ textAlign: "right" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
+                      >
+                        <FaAlignRight />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().undo().run()}
+                        className="p-2 rounded text-gray-800 hover:bg-gray-200"
+                      >
+                        <FaUndo />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editor.chain().focus().redo().run()}
+                        className="p-2 rounded text-gray-800 hover:bg-gray-200"
+                      >
+                        <FaRedo />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Editor content */}
+                  {editorReady && (
+                    <EditorContent editor={editor} />
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Author */}
             <div>
@@ -251,25 +264,24 @@ const EditArticle = () => {
             {/* Image */}
             <div>
               <label htmlFor="image" className="block text-sm font-medium text-gray-900">
-                Image
+                Upload Image
               </label>
               <input
-                type="file"
-                onChange={handleImageChange}
                 id="image"
                 name="image"
+                type="file"
                 accept="image/*"
-                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md"
+                onChange={handleImageChange}
+                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
 
-            <div className="mt-6">
+            <div className="flex justify-center items-center space-x-4 mt-4">
               <button
                 type="submit"
-                className="w-full py-2 px-4 text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                disabled={loading}
+                className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
-                {loading ? "Updating..." : "Update Article"}
+                Save Changes
               </button>
             </div>
           </form>
