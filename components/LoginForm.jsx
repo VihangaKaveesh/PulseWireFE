@@ -34,7 +34,7 @@ export default function LoginForm() {
             }
 // Display the alert when login is successful
 window.alert("Successfully logged in");
-            router.replace("/dashboard"); // Redirect to dashboard on success
+            router.replace("../dashboard"); // Redirect to dashboard on success
         } catch (error) {
             console.log(error);
             setIsLoading(false); // Stop loading in case of error
