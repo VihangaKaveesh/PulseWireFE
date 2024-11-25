@@ -19,10 +19,10 @@ export default function AdminNavBar() {
     
     // If confirmed, redirect to the home page
     if (confirmLogout) {
-      window.location.href = "/";  
-    }
-    if (confirmLogout) {
-      signOut();  // Call signOut function after confirmation
+      signOut({
+        redirect: true, // Automatically redirects after sign out
+        callbackUrl: '/' // Redirect to the home page after sign out
+      });
     }
   };
 
