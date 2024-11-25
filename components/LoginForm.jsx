@@ -7,19 +7,19 @@ import { signIn } from "next-auth/react"; // Import signIn from NextAuth
 import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
-    const [email, setEmail] = useState(""); // Store email input
-    const [password, setPassword] = useState(""); // Store password input
+    const [email, setEmail] = useState(""); 
+    const [password, setPassword] = useState(""); 
     const [error, setError] = useState("");
-    const [isLoading, setIsLoading] = useState(false); // Loading state
+    const [isLoading, setIsLoading] = useState(false); 
 
     const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true); // Start loading
+        setIsLoading(true); 
 
         try {
-            // Use NextAuth signIn with callbackUrl to redirect after successful login
+            // signIn with callbackUrl to redirect after successful login
             const result = await signIn("credentials", {
                 email,
                 password,
@@ -27,17 +27,17 @@ export default function LoginForm() {
             });
 
             if (result.error) {
-                // Display error if login fails
+              
                 setError("Invalid login credentials. Please try again.");
-                setIsLoading(false); // Stop loading
+                setIsLoading(false); 
                 return;
             }
-// Display the alert when login is successful
+
 window.alert("Successfully logged in");
             router.replace("../dashboard"); // Redirect to dashboard on success
         } catch (error) {
             console.log(error);
-            setIsLoading(false); // Stop loading in case of error
+            setIsLoading(false);
         }
     };
 
@@ -45,7 +45,7 @@ window.alert("Successfully logged in");
         <>
             <HomeNavBar />
 
-            {/* Full-page loading spinner */}
+           
             {isLoading && (
                 <div className="fixed inset-0 bg-gray-200 bg-opacity-75 flex justify-center items-center z-50">
                     <div className="animate-spin rounded-full border-t-4 border-blue-500 w-16 h-16"></div>
@@ -54,12 +54,6 @@ window.alert("Successfully logged in");
 
             {/* Main container */}
             <div className="flex min-h-screen items-center justify-center px-6 py-12">
-                {/* Back button linking to home page */}
-                <Link href={"/"}>
-                    <button className="absolute top-4 left-4 px-4 py-2 sm:px-6 sm:py-3 bg-indigo-600 text-white text-sm sm:text-base font-medium rounded-md shadow-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                        Go Back
-                    </button>
-                </Link>
 
                 {/* The main form container */}
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">

@@ -26,11 +26,19 @@ export const metadata = {
 
 
 
+// this wraps the entire application
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+   
+    <html lang="en"> 
+      <body className={inter.className}> 
+        
+        {/* Wrap the children components inside the AuthProvider component */}
         <AuthProvider>{children}</AuthProvider>
+
+        {/* The AuthProvider component handles authentication context for the app, 
+            making authentication available to all child components */}
       </body>
     </html>
-  );}
+  );
+}

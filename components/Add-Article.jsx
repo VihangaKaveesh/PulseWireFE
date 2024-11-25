@@ -17,7 +17,7 @@ export default function AddArticle() {
   const [image, setImage] = useState(null);
   const [error, setError] = useState("");
   const [content, setContent] = useState("");
-  const [isLoading, setIsLoading] = useState(true);  // Set loading to true initially
+  const [isLoading, setIsLoading] = useState(true);  
 
   // Initialize Tiptap editor
   const editor = useEditor({
@@ -26,12 +26,12 @@ export default function AddArticle() {
         bulletList: true,
         orderedList: true,
       }),
-      Underline, // Enable underline functionality
+      Underline, // Enable underline 
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
-      BulletList, // Explicitly add bullet list support
-      OrderedList, // Explicitly add ordered list support
+      BulletList, // Explicitly add bullet list 
+      OrderedList, // Explicitly add ordered list 
     ],
     content: "",
     onUpdate: ({ editor }) => {
@@ -39,10 +39,10 @@ export default function AddArticle() {
     },
   });
 
-  // Simulate page loading, set loading to false after 2 seconds
+  
   useEffect(() => {
     setTimeout(() => {
-      setIsLoading(false);  // End loading after 2 seconds
+      setIsLoading(false);  
     }, 2000);
   }, []);
 
@@ -87,13 +87,13 @@ export default function AddArticle() {
       console.error("Error during submission:", error);
       setError("An unexpected error occurred.");
     } finally {
-      setIsLoading(false); // Stop loading animation after submission
+      setIsLoading(false); 
     }
   };
 
   return (
     <>
-      {/* Loading Page when the component is first called */}
+   
       {isLoading && (
         <div className="fixed inset-0 bg-gray-200 bg-opacity-75 flex justify-center items-center z-50">
           <div className="animate-spin rounded-full border-t-4 border-blue-500 w-16 h-16"></div>
@@ -205,7 +205,7 @@ export default function AddArticle() {
               </div>
             </div>
 
-            {/* Other Input Fields */}
+           
             <div>
               <label htmlFor="author" className="block text-sm font-medium text-gray-900">
                 Author

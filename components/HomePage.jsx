@@ -8,11 +8,11 @@ import Image from "next/image";
 import HomeNavBar from "./Home-NavBar";
 
 export default function Dashboard() {
-  const [userData, setUserData] = useState([]); // Store articles fetched from the backend
-  const [modalData, setModalData] = useState(null); // Data for the modal
-  const [isLoading, setIsLoading] = useState(true); // Loading state to manage the loading spinner
+  const [userData, setUserData] = useState([]); 
+  const [modalData, setModalData] = useState(null); 
+  const [isLoading, setIsLoading] = useState(true); 
 
-  // Fetch articles on component mount
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -20,14 +20,14 @@ export default function Dashboard() {
   // Fetch articles from the backend
   const fetchData = async () => {
     try {
-      // Replace with your deployed backend URL
+      
       const result = await axios(`${process.env.NEXT_PUBLIC_BACKEND_URL}/`);
       console.log(result.data);
       setUserData(result.data); // Store fetched articles
     } catch (error) {
       console.error("Something went wrong:", error);
     } finally {
-      setIsLoading(false); // Stop loading once data is fetched
+      setIsLoading(false); 
     }
   };
 
@@ -47,7 +47,7 @@ export default function Dashboard() {
     <>
       <HomeNavBar />
 
-      {/* Full-page loading animation */}
+      {/* loading animation */}
       {isLoading && (
         <div className="fixed inset-0 bg-gray-200 bg-opacity-75 flex justify-center items-center z-50">
           <div className="animate-spin rounded-full border-t-4 border-blue-500 w-16 h-16"></div>
@@ -57,7 +57,7 @@ export default function Dashboard() {
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-6 pt-20">Articles</h1>
         
-        {/* Show articles once loading is complete */}
+     
         {!isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {userData.map((article, index) => (

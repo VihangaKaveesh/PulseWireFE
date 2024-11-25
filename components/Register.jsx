@@ -10,20 +10,21 @@ export default function RegisterAdmin() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isLoading, setIsLoading] = useState(false); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Show loading spinner
+    setIsLoading(true); 
 
     // Check if password and confirm password match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
-      setIsLoading(false); // Hide loading spinner
+      setIsLoading(false);
       return;
     }
 
     try {
+      // Making a POST request 
       const res = await fetch("../api/register-admin", {
         method: "POST",
         headers: {
@@ -40,15 +41,15 @@ export default function RegisterAdmin() {
 
       if (res.ok) {
         window.alert("Admin Added successfully");
-        window.location.href = "/dashboard"; // Redirect on success
+        window.location.href = "/dashboard"; 
       } else {
-        // Handle errors
+        
         setError(data.error || "Something went wrong");
       }
     } catch (error) {
       setError("Failed to register admin.");
     } finally {
-      setIsLoading(false); // Hide loading spinner after request is completed
+      setIsLoading(false); 
     }
   };
 

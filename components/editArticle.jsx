@@ -1,28 +1,20 @@
-"use client";
+"use client"; 
 
-import { useState, useEffect } from "react";
-import axios from "axios";
-import AdminNavBar from "./Admin-NavBar";
-import { EditorContent, useEditor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import TextAlign from "@tiptap/extension-text-align";
-import Underline from "@tiptap/extension-underline";
-import BulletList from "@tiptap/extension-bullet-list";
-import OrderedList from "@tiptap/extension-ordered-list";
-import {
-  FaBold,
-  FaItalic,
-  FaUnderline,
-  FaListUl,
-  FaListOl,
-  FaAlignLeft,
-  FaAlignCenter,
-  FaAlignRight,
-  FaUndo,
-  FaRedo,
-} from "react-icons/fa";
+import { useState, useEffect } from "react"; 
+import axios from "axios"; 
+import AdminNavBar from "./Admin-NavBar"; 
+import { EditorContent, useEditor } from "@tiptap/react"; 
+import StarterKit from "@tiptap/starter-kit"; 
+import TextAlign from "@tiptap/extension-text-align"; 
+import Underline from "@tiptap/extension-underline"; 
+import BulletList from "@tiptap/extension-bullet-list"; 
+import OrderedList from "@tiptap/extension-ordered-list"; 
+import { 
+  FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaAlignLeft, FaAlignCenter, FaAlignRight, FaUndo, FaRedo 
+} from "react-icons/fa"; // Importing icons
 
 const EditArticle = ({ articleId, navigate }) => {
+  // State variables to manage article data
   const [article, setArticle] = useState({
     title: "",
     content: "",
@@ -31,21 +23,23 @@ const EditArticle = ({ articleId, navigate }) => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"; // URL to the backend server
 
+  // Initializing the Tiptap editor 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Underline,
+      StarterKit, 
+      Underline, 
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      BulletList,
-      OrderedList,
+      BulletList, 
+      OrderedList
     ],
     content: article.content,
     onUpdate: ({ editor }) => {
       setArticle((prev) => ({ ...prev, content: editor.getHTML() }));
     },
   });
+
 
   useEffect(() => {
     const fetchArticle = async () => {
@@ -70,17 +64,20 @@ const EditArticle = ({ articleId, navigate }) => {
     };
 
     fetchArticle();
-  }, [articleId, backendUrl, editor]);
+  }, [articleId, backendUrl, editor]); //  refetch article data when values change
 
+  // handle changes 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setArticle((prev) => ({ ...prev, [name]: value }));
   };
 
+  //  handle image changes 
   const handleImageChange = (e) => {
     setArticle((prev) => ({ ...prev, image: e.target.files[0] }));
   };
 
+  // handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -95,7 +92,7 @@ const EditArticle = ({ articleId, navigate }) => {
       const response = await axios.put(`${backendUrl}/update/${articleId}`, formData);
       if (response.status === 200) {
         alert("Article updated successfully!");
-        navigate("/dashboard");
+        navigate("/dashboard"); 
       } else {
         throw new Error("Failed to update the article.");
       }
@@ -106,90 +103,43 @@ const EditArticle = ({ articleId, navigate }) => {
     }
   };
 
+  // Function to render the editor's toolbar with formatting options
   const renderEditorToolbar = () => (
     <div className="flex items-center gap-2 mb-2 bg-gray-100 p-2 rounded-md shadow">
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive("bold") ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? "text-indigo-600" : ""}>
         <FaBold />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive("italic") ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? "text-indigo-600" : ""}>
         <FaItalic />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={editor.isActive("underline") ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleUnderline().run()} className={editor.isActive("underline") ? "text-indigo-600" : ""}>
         <FaUnderline />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive("bulletList") ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? "text-indigo-600" : ""}>
         <FaListUl />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive("orderedList") ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? "text-indigo-600" : ""}>
         <FaListOl />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().setTextAlign("left").run()}
-        className={editor.isActive({ textAlign: "left" }) ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().setTextAlign("left").run()} className={editor.isActive({ textAlign: "left" }) ? "text-indigo-600" : ""}>
         <FaAlignLeft />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().setTextAlign("center").run()}
-        className={editor.isActive({ textAlign: "center" }) ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().setTextAlign("center").run()} className={editor.isActive({ textAlign: "center" }) ? "text-indigo-600" : ""}>
         <FaAlignCenter />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().setTextAlign("right").run()}
-        className={editor.isActive({ textAlign: "right" }) ? "text-indigo-600" : ""}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().setTextAlign("right").run()} className={editor.isActive({ textAlign: "right" }) ? "text-indigo-600" : ""}>
         <FaAlignRight />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().undo().run()}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().undo().run()}>
         <FaUndo />
       </button>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => editor.chain().focus().redo().run()}
-      >
+      <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => editor.chain().focus().redo().run()}>
         <FaRedo />
       </button>
     </div>
   );
-  
 
+  // If the component is loading, display a loading 
   if (loading) {
     return (
       <div className="fixed inset-0 bg-gray-200 bg-opacity-75 flex justify-center items-center z-50">
@@ -198,77 +148,37 @@ const EditArticle = ({ articleId, navigate }) => {
     );
   }
 
+
   return (
     <>
-      <AdminNavBar />
-      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-gray-50"  onSubmit={handleSubmit}>
+      <AdminNavBar /> 
+      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-gray-50" onSubmit={handleSubmit}>
         <div className="sm:mx-auto sm:w-full sm:max-w-md bg-white p-8 rounded-lg shadow-lg">
-          <h1 className="text-center text-2xl font-bold tracking-tight text-gray-900 mb-6">
-            Edit Article
-          </h1>
+          <h1 className="text-center text-2xl font-bold tracking-tight text-gray-900 mb-6">Edit Article</h1>
           <form className="space-y-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-900">
-                Title
-              </label>
-              <input
-                value={article.title}
-                onChange={handleInputChange}
-                id="title"
-                name="title"
-                type="text"
-                required
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
+              <label htmlFor="title" className="block text-sm font-medium text-gray-900">Title</label>
+              <input value={article.title} onChange={handleInputChange} id="title" name="title" type="text" required className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
             </div>
-
             <div>
-              <label htmlFor="content" className="block text-sm font-medium text-gray-900">
-                Content
-              </label>
+              <label htmlFor="content" className="block text-sm font-medium text-gray-900">Content</label>
               {renderEditorToolbar()}
               <div className="mt-2 border border-gray-300 rounded-md shadow-sm">
                 <EditorContent editor={editor} className="p-3 min-h-[200px]" />
               </div>
             </div>
-
             <div>
-              <label htmlFor="author" className="block text-sm font-medium text-gray-900">
-                Author
-              </label>
-              <input
-                value={article.author}
-                onChange={handleInputChange}
-                id="author"
-                name="author"
-                type="text"
-                required
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              />
+              <label htmlFor="author" className="block text-sm font-medium text-gray-900">Author</label>
+              <input value={article.author} onChange={handleInputChange} id="author" name="author" type="text" required className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
             </div>
-
             <div>
-              <label htmlFor="image" className="block text-sm font-medium text-gray-900">
-                Upload Image
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                id="image"
-                name="image"
-                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:py-2 file:px-4 file:border-0 file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"
-              />
+              <label htmlFor="image" className="block text-sm font-medium text-gray-900">Upload Image</label>
+              <input type="file" onChange={handleImageChange} id="image" name="image" accept="image/*" className="block w-full text-sm text-gray-500 border border-gray-300 rounded-md py-2" />
             </div>
-
-            {error && <p className="text-red-500 text-xs">{error}</p>}
-
-            <div>
-              <button
-                type="submit"
-                className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-500"
-              >
-                Update Article
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <div className="mt-4">
+              <button type="submit" className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Save Changes
               </button>
             </div>
           </form>

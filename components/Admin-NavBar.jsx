@@ -20,8 +20,8 @@ export default function AdminNavBar() {
     // If confirmed, redirect to the home page
     if (confirmLogout) {
       signOut({
-        redirect: true, // Automatically redirects after sign out
-        callbackUrl: '/' // Redirect to the home page after sign out
+        redirect: true, 
+        callbackUrl: '/' 
       });
     }
   };
@@ -92,7 +92,7 @@ export default function AdminNavBar() {
         </div>
       </div>
 
-      {/* Mobile menu (shown when isMenuOpen is true) */}
+      {/* Mobile menu */}
       <div
         className={`sm:hidden ${isMenuOpen ? "block" : "hidden"}`}
       >
