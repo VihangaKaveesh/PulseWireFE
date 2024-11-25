@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import AdminNavBar from "./Admin-NavBar";
@@ -10,128 +9,187 @@ import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
-import { FaBold, FaItalic, FaUnderline, FaListUl, FaListOl, FaAlignLeft, FaAlignCenter, FaAlignRight, FaUndo, FaRedo } from "react-icons/fa";
+import {
+  FaBold,
+  FaItalic,
+  FaUnderline,
+  FaListUl,
+  FaListOl,
+  FaAlignLeft,
+  FaAlignCenter,
+  FaAlignRight,
+  FaUndo,
+  FaRedo,
+} from "react-icons/fa";
 
-const EditArticle = () => {
-  const [searchParams] = useSearchParams();
-  const articleId = searchParams.get("id");
-
+const EditArticle = ({ articleId, navigate }) => {
   const [article, setArticle] = useState({
     title: "",
     content: "",
     author: "",
     image: null,
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-  const [loading, setLoading] = useState(false); // Set loading state to false initially
-  const [error, setError] = useState(null);
-
-  // Initialize Tiptap editor only on the client side
-  const [editorReady, setEditorReady] = useState(false);
-
-  useEffect(() => {
-    // This ensures the editor initializes only in the browser (client-side)
-    if (typeof window !== "undefined") {
-      setEditorReady(true);
-    }
-  }, []);
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        bulletList: true,
-        orderedList: true,
-      }),
+      StarterKit,
       Underline,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
       BulletList,
       OrderedList,
     ],
-    content: article.content, // Initially set content to the article content
+    content: article.content,
     onUpdate: ({ editor }) => {
-      setArticle((prevArticle) => ({
-        ...prevArticle,
-        content: editor.getHTML(),
-      }));
+      setArticle((prev) => ({ ...prev, content: editor.getHTML() }));
     },
   });
 
   useEffect(() => {
     const fetchArticle = async () => {
-      setLoading(true); // Set loading to true while fetching the article
+      if (!articleId) return;
+
       try {
         const response = await axios.get(`${backendUrl}/article/${articleId}`);
         const fetchedArticle = response.data;
-        setArticle(fetchedArticle);
-        setLoading(false); // Set loading to false once data is fetched
+        setArticle({
+          title: fetchedArticle.title,
+          content: fetchedArticle.content,
+          author: fetchedArticle.author,
+          image: null,
+        });
 
-        // Set the editor content when the article data is fetched
-        if (editor && fetchedArticle.content) {
-          editor.commands.setContent(fetchedArticle.content); // Populate content
-        }
+        if (editor) editor.commands.setContent(fetchedArticle.content || "");
       } catch (err) {
-        setError("Failed to fetch the article.");
-        setLoading(false); // Set loading to false in case of an error
+        setError("Failed to fetch article data.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (articleId) fetchArticle();
-  }, [articleId, backendUrl, editor]); // Added backendUrl to dependencies
+    fetchArticle();
+  }, [articleId, backendUrl, editor]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setArticle((prevArticle) => ({
-      ...prevArticle,
-      [name]: value,
-    }));
+    setArticle((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
-    setArticle((prevArticle) => ({
-      ...prevArticle,
-      image: e.target.files[0],
-    }));
+    setArticle((prev) => ({ ...prev, image: e.target.files[0] }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true during form submission
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("title", article.title);
     formData.append("content", article.content);
     formData.append("author", article.author);
-
-    if (article.image) {
-      formData.append("image", article.image);
-    }
+    if (article.image) formData.append("image", article.image);
 
     try {
-      const response = await axios.put(`${backendUrl}/update/${articleId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
+      const response = await axios.put(`${backendUrl}/update/${articleId}`, formData);
       if (response.status === 200) {
         alert("Article updated successfully!");
-        window.location.href = "/dashboard";
-        const updatedArticle = response.data;
-        setArticle(updatedArticle);
+        navigate("/dashboard");
       } else {
         throw new Error("Failed to update the article.");
       }
     } catch (err) {
-      console.error("Error updating article:", err);
-      alert("Failed to update the article.");
+      setError("An error occurred while updating the article.");
     } finally {
-      setLoading(false); // Set loading to false after submission is complete
+      setLoading(false);
     }
   };
 
-  // Show a loading spinner when data is being fetched or submitted
+  const renderEditorToolbar = () => (
+    <div className="flex items-center gap-2 mb-2 bg-gray-100 p-2 rounded-md shadow">
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive("bold") ? "text-indigo-600" : ""}
+      >
+        <FaBold />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive("italic") ? "text-indigo-600" : ""}
+      >
+        <FaItalic />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        className={editor.isActive("underline") ? "text-indigo-600" : ""}
+      >
+        <FaUnderline />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={editor.isActive("bulletList") ? "text-indigo-600" : ""}
+      >
+        <FaListUl />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={editor.isActive("orderedList") ? "text-indigo-600" : ""}
+      >
+        <FaListOl />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().setTextAlign("left").run()}
+        className={editor.isActive({ textAlign: "left" }) ? "text-indigo-600" : ""}
+      >
+        <FaAlignLeft />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().setTextAlign("center").run()}
+        className={editor.isActive({ textAlign: "center" }) ? "text-indigo-600" : ""}
+      >
+        <FaAlignCenter />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().setTextAlign("right").run()}
+        className={editor.isActive({ textAlign: "right" }) ? "text-indigo-600" : ""}
+      >
+        <FaAlignRight />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().undo().run()}
+      >
+        <FaUndo />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => editor.chain().focus().redo().run()}
+      >
+        <FaRedo />
+      </button>
+    </div>
+  );
+  
+
   if (loading) {
     return (
       <div className="fixed inset-0 bg-gray-200 bg-opacity-75 flex justify-center items-center z-50">
@@ -140,19 +198,15 @@ const EditArticle = () => {
     );
   }
 
-  // Handle errors
-  if (error) return <p>{error}</p>;
-
   return (
     <>
       <AdminNavBar />
-      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center px-6 py-12 bg-gray-50"  onSubmit={handleSubmit}>
         <div className="sm:mx-auto sm:w-full sm:max-w-md bg-white p-8 rounded-lg shadow-lg">
           <h1 className="text-center text-2xl font-bold tracking-tight text-gray-900 mb-6">
             Edit Article
           </h1>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Title */}
+          <form className="space-y-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-900">
                 Title
@@ -168,84 +222,16 @@ const EditArticle = () => {
               />
             </div>
 
-            {/* Tiptap Editor */}
-            {editorReady && (
-              <div>
-                <label htmlFor="content" className="block text-sm font-medium text-gray-900">
-                  Content
-                </label>
-                <div className="mt-2 border border-gray-300 rounded-md shadow-sm">
-                  {/* Toolbar */}
-                  {editor && (
-                    <div className="toolbar flex flex-wrap space-x-2 bg-gray-100 p-2 rounded-t-md shadow">
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().toggleBold().run()}
-                        className={`p-2 rounded ${editor.isActive("bold") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                      >
-                        <FaBold />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().toggleItalic().run()}
-                        className={`p-2 rounded ${editor.isActive("italic") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                      >
-                        <FaItalic />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().toggleUnderline().run()}
-                        className={`p-2 rounded ${editor.isActive("underline") ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                      >
-                        <FaUnderline />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().setTextAlign("left").run()}
-                        className={`p-2 rounded ${editor.isActive({ textAlign: "left" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                      >
-                        <FaAlignLeft />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().setTextAlign("center").run()}
-                        className={`p-2 rounded ${editor.isActive({ textAlign: "center" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                      >
-                        <FaAlignCenter />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().setTextAlign("right").run()}
-                        className={`p-2 rounded ${editor.isActive({ textAlign: "right" }) ? "bg-indigo-500 text-white" : "text-gray-800 hover:bg-gray-200"}`}
-                      >
-                        <FaAlignRight />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().undo().run()}
-                        className="p-2 rounded text-gray-800 hover:bg-gray-200"
-                      >
-                        <FaUndo />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editor.chain().focus().redo().run()}
-                        className="p-2 rounded text-gray-800 hover:bg-gray-200"
-                      >
-                        <FaRedo />
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Editor content */}
-                  {editorReady && (
-                    <EditorContent editor={editor} />
-                  )}
-                </div>
+            <div>
+              <label htmlFor="content" className="block text-sm font-medium text-gray-900">
+                Content
+              </label>
+              {renderEditorToolbar()}
+              <div className="mt-2 border border-gray-300 rounded-md shadow-sm">
+                <EditorContent editor={editor} className="p-3 min-h-[200px]" />
               </div>
-            )}
+            </div>
 
-            {/* Author */}
             <div>
               <label htmlFor="author" className="block text-sm font-medium text-gray-900">
                 Author
@@ -261,27 +247,28 @@ const EditArticle = () => {
               />
             </div>
 
-            {/* Image */}
             <div>
               <label htmlFor="image" className="block text-sm font-medium text-gray-900">
                 Upload Image
               </label>
               <input
-                id="image"
-                name="image"
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                id="image"
+                name="image"
+                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md file:py-2 file:px-4 file:border-0 file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"
               />
             </div>
 
-            <div className="flex justify-center items-center space-x-4 mt-4">
+            {error && <p className="text-red-500 text-xs">{error}</p>}
+
+            <div>
               <button
                 type="submit"
-                className="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-500"
               >
-                Save Changes
+                Update Article
               </button>
             </div>
           </form>
